@@ -10,11 +10,17 @@ export namespace AuthApi {
   /** 登录接口返回值 */
   export interface LoginResult {
     accessToken: string;
+    userId: string;
   }
 
   export interface RefreshTokenResult {
     data: string;
     status: number;
+  }
+
+  export interface PhoneLoginParams {
+    phone: string;
+    code: string;
   }
 }
 
@@ -23,6 +29,13 @@ export namespace AuthApi {
  */
 export async function loginApi(data: AuthApi.LoginParams) {
   return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
+}
+
+/**
+ * 手机号登录
+ */
+export async function phoneLoginApi(data: AuthApi.PhoneLoginParams) {
+  return requestClient.post<AuthApi.LoginResult>('/auth/phone-login', data);
 }
 
 /**
@@ -47,5 +60,6 @@ export async function logoutApi() {
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/auth/codes');
+  return [];
+  // return requestClient.get<string[]>('/auth/codes');
 }
