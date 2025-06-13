@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { FolderApi } from '#/api/core/folder';
 import type { LiteratureModel } from '#/api/core/literature';
 
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -40,6 +39,8 @@ import {
   Tree,
 } from 'ant-design-vue';
 
+import { FolderApi, listFoldersApi } from '#/api/core/folder';
+import CreateFolder from '#/components/folder/create-folder.vue';
 // import {
 //   getFolderTreeApi,
 //   getFolderDetailApi,
@@ -61,7 +62,6 @@ import {
 //   updatePdfInfoApi,
 //   updateEndnoteInfoApi,
 // } from '#/api/core/literature';
-// import FolderFormModal from '#/components/Floder/FolderFormModal.vue';
 // import MoveLiteratureModal from '#/components/Floder/MoveLiteratureModal.vue';
 // import SmartFolderFormModal from '#/components/Floder/SmartFolderFormModal.vue';
 // import EndnoteInfoEditor from '#/components/Literature/EndnoteInfoEditor.vue';
@@ -229,35 +229,26 @@ const loadFolderTree = async () => {
     console.log('【文献页面】开始加载文件夹树');
 
     // 确保用户有默认文件夹
-    await ensureUserFoldersInitializedApi();
+    // await ensureUserFoldersInitializedApi();
 
     // 加载文件夹树
-    const folders = await getFolderTreeApi();
+    const folders = await listFoldersApi();
     console.log('【文献页面】获取到文件夹树数据:', folders);
 
     // 统计文件夹类型
     let normalCount = 0;
     let systemCount = 0;
-    let smartCount = 0;
-    const countFolders = (nodes: FolderApi.FolderTreeNode[]) => {
+    const countFolders = (nodes: FolderApi.Folder[]) => {
       nodes.forEach((node) => {
         switch (node.type) {
-          case 'normal': {
-            normalCount++;
-            break;
-          }
-          case 'smart': {
-            smartCount++;
-            break;
-          }
-          case 'system': {
+          case FolderApi.FolderType.SYSTEM: {
             systemCount++;
             break;
           }
-        }
-
-        if (node.children && node.children.length > 0) {
-          countFolders(node.children);
+          case FolderApi.FolderType.USER: {
+            normalCount++;
+            break;
+          }
         }
       });
     };
@@ -265,8 +256,7 @@ const loadFolderTree = async () => {
     console.log('【文献页面】文件夹类型统计:', {
       normal: normalCount,
       system: systemCount,
-      smart: smartCount,
-      total: normalCount + systemCount + smartCount,
+      total: normalCount + systemCount,
     });
 
     // 直接使用API返回的数据 - Tree组件会使用replaceFields进行属性映射
@@ -839,15 +829,15 @@ const convertToTreeData = (folders: FolderApi.FolderTreeNode[]): any[] => {
           <h3>文件夹</h3>
           <div class="folder-actions">
             <Tooltip title="新建文件夹">
-              <Button type="text" size="small" @click="handleCreateFolder">
+              <Button type="text" @click="handleCreateFolder">
                 <template #icon><FolderAddOutlined /></template>
               </Button>
             </Tooltip>
-            <Tooltip title="新建智能文件夹">
+            <!-- <Tooltip title="新建智能文件夹">
               <Button type="text" size="small" @click="handleCreateSmartFolder">
                 <template #icon><AppstoreAddOutlined /></template>
               </Button>
-            </Tooltip>
+            </Tooltip> -->
             <Tooltip title="刷新统计信息">
               <Button
                 type="text"
@@ -1105,13 +1095,13 @@ const convertToTreeData = (folders: FolderApi.FolderTreeNode[]): any[] => {
     />
 
     <!-- 创建/编辑文件夹弹窗 -->
-    <!-- <FolderFormModal
+    <CreateFolder
       v-model:visible="folderFormVisible"
       :folder-data="editingFolder"
       :is-creating="isCreatingFolder"
       :parent-folder-id="folderFormParentId"
       @success="handleFolderFormSuccess"
-    /> -->
+    />
 
     <!-- 创建智能文件夹弹窗 -->
     <!-- <SmartFolderFormModal
@@ -1129,14 +1119,14 @@ const convertToTreeData = (folders: FolderApi.FolderTreeNode[]): any[] => {
     /> -->
 
     <!-- 文献信息编辑器弹窗 -->
-    <EndnoteInfoEditor
+    <!-- <EndnoteInfoEditor
       v-if="showEndnoteEditor && currentEditingLiterature"
       :visible="showEndnoteEditor"
       :endnote-info="currentEditingLiterature.endnote_info"
       :title="`编辑《${currentEditingLiterature.endnote_info?.Title || currentEditingLiterature.title || ''}》的文献信息`"
       @cancel="showEndnoteEditor = false"
       @submit="handleEndnoteInfoSubmit"
-    />
+    /> -->
   </div>
 </template>
 

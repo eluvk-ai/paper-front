@@ -1,13 +1,58 @@
 import { requestClient } from '#/api/request';
 
 export namespace FolderApi {
-  // 文件夹类型
   export enum FolderType {
-    NORMAL = 'normal',
-    SMART = 'smart',
     SYSTEM = 'system',
+    USER = 'user',
   }
 
+  export interface Folder {
+    id: string;
+    parentId?: string;
+
+    name: string;
+    description?: string;
+    type: FolderType;
+  }
+
+  export interface CreateFolderParams {
+    name: string; // create must have a name
+    parentId?: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+    isPinned?: boolean;
+    sortOrder?: number;
+  }
+
+  export interface UpdateFolderParams {
+    name?: string;
+    parentId?: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+    isPinned?: boolean;
+    sortOrder?: number;
+  }
+}
+
+export async function listFoldersApi() {
+  return requestClient.get<FolderApi.Folder[]>('/folder');
+}
+
+export async function createFolderApi(data: FolderApi.CreateFolderParams) {
+  return requestClient.post<FolderApi.FolderModel>('/folder', data);
+}
+
+export async function updateFolderApi(
+  folderId: string,
+  data: FolderApi.UpdateFolderParams,
+) {
+  return requestClient.put<FolderApi.FolderModel>(`/folder/${folderId}`, data);
+}
+
+// -----
+export namespace FolderApi {
   // 智能文件夹规则接口
   export interface SmartFolderRule {
     field: string;
@@ -75,15 +120,15 @@ export namespace FolderApi {
   }
 
   // 创建文件夹请求参数
-  export interface CreateFolderParams {
-    name: string;
-    parent_folder_id?: string;
-    description?: string;
-    icon?: string;
-    color?: string;
-    is_pinned?: boolean;
-    sort_order?: number;
-  }
+  // export interface CreateFolderParams {
+  //   name: string;
+  //   parent_folder_id?: string;
+  //   description?: string;
+  //   icon?: string;
+  //   color?: string;
+  //   is_pinned?: boolean;
+  //   sort_order?: number;
+  // }
 
   // 创建智能文件夹请求参数
   export interface CreateSmartFolderParams {
@@ -97,15 +142,15 @@ export namespace FolderApi {
   }
 
   // 更新文件夹请求参数
-  export interface UpdateFolderParams {
-    name?: string;
-    parent_folder_id?: string;
-    description?: string;
-    icon?: string;
-    color?: string;
-    is_pinned?: boolean;
-    sort_order?: number;
-  }
+  // export interface UpdateFolderParams {
+  //   name?: string;
+  //   parent_folder_id?: string;
+  //   description?: string;
+  //   icon?: string;
+  //   color?: string;
+  //   is_pinned?: boolean;
+  //   sort_order?: number;
+  // }
 
   // 文献与文件夹关联请求参数
   export interface LiteraturesToFolderParams {
@@ -155,9 +200,9 @@ export async function getFolderDetailApi(folderId: string) {
  * 创建普通文件夹
  * @param data 文件夹数据
  */
-export async function createFolderApi(data: FolderApi.CreateFolderParams) {
-  return requestClient.post<FolderApi.FolderModel>('/folder/create', data);
-}
+// export async function createFolderApi(data: FolderApi.CreateFolderParams) {
+//   return requestClient.post<FolderApi.FolderModel>('/folder/create', data);
+// }
 
 /**
  * 创建智能文件夹
@@ -177,12 +222,12 @@ export async function createSmartFolderApi(
  * @param folderId 文件夹ID
  * @param data 更新数据
  */
-export async function updateFolderApi(
-  folderId: string,
-  data: FolderApi.UpdateFolderParams,
-) {
-  return requestClient.put<FolderApi.FolderModel>(`/folder/${folderId}`, data);
-}
+// export async function updateFolderApi(
+//   folderId: string,
+//   data: FolderApi.UpdateFolderParams,
+// ) {
+//   return requestClient.put<FolderApi.FolderModel>(`/folder/${folderId}`, data);
+// }
 
 /**
  * 删除文件夹
@@ -286,6 +331,7 @@ export async function initializeDefaultFoldersApi() {
  * 检查并初始化文件夹结构
  * 用于应用启动时确保用户有默认文件夹
  */
+// todo we don't need this api, make sure folder structure is initialized in the backend
 export async function ensureUserFoldersInitializedApi() {
   try {
     const folders = await getFolderTreeApi();

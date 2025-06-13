@@ -7,7 +7,11 @@ import { computed, ref } from 'vue';
 import { AuthenticationCodeLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { useAuthStore } from '#/store';
+
 defineOptions({ name: 'CodeLogin' });
+
+const authStore = useAuthStore();
 
 const loading = ref(false);
 const CODE_LENGTH = 6;
@@ -19,7 +23,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         placeholder: $t('authentication.mobile'),
       },
-      fieldName: 'phoneNumber',
+      fieldName: 'phone',
       label: $t('authentication.mobile'),
       rules: z
         .string()
@@ -56,7 +60,8 @@ const formSchema = computed((): VbenFormSchema[] => {
  */
 async function handleLogin(values: Recordable<any>) {
   // eslint-disable-next-line no-console
-  console.log(values);
+  console.log('Login button clicked, validating form...', values);
+  authStore.authMobileLogin(values);
 }
 </script>
 
@@ -64,6 +69,6 @@ async function handleLogin(values: Recordable<any>) {
   <AuthenticationCodeLogin
     :form-schema="formSchema"
     :loading="loading"
-    @submit="handleLogin"
+    @submit="authStore.authMobileLogin"
   />
 </template>
